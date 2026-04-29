@@ -1,12 +1,16 @@
 import { useApp } from '../../state/AppContext';
 import { StorageService } from '../../storage/StorageService';
 import { CATEGORIES } from '../../models/types';
+import dialogues from '../../data/dialogues.json';
+import type { Dialogue } from '../../models/types';
+
+const DATA = dialogues as Dialogue[];
+const TOTAL_LINES = DATA.length;
 
 export function SettingsPage() {
   const { state, dispatch } = useApp();
 
   const totalDone = Object.values(state.progress).reduce((sum, arr) => sum + arr.length, 0);
-  const unlockedCount = state.unlocked.length;
 
   return (
     <div className="px-4 pb-24 pt-4">
@@ -15,8 +19,8 @@ export function SettingsPage() {
       <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
         <h3 className="mb-3 text-sm font-bold text-slate-500 dark:text-slate-400">학습 통계</h3>
         <div className="grid grid-cols-2 gap-2 text-center">
-          <Stat label="총 학습한 문장" value={`${totalDone} / 200`} />
-          <Stat label="해금한 카테고리" value={`${unlockedCount} / ${CATEGORIES.filter(c => c.locked).length}`} />
+          <Stat label="학습한 문장" value={`${totalDone} / ${TOTAL_LINES}`} />
+          <Stat label="카테고리" value={`${CATEGORIES.length}개`} />
         </div>
       </section>
 
@@ -59,7 +63,7 @@ export function SettingsPage() {
       <section className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900 dark:bg-rose-900/30">
         <h3 className="mb-2 text-sm font-bold text-rose-700 dark:text-rose-300">데이터 초기화</h3>
         <p className="mb-3 text-xs text-rose-700/80 dark:text-rose-300/80">
-          진도, 해금 정보, 설정이 모두 삭제됩니다.
+          진도와 설정이 모두 삭제됩니다.
         </p>
         <button
           onClick={() => {
@@ -74,7 +78,7 @@ export function SettingsPage() {
         </button>
       </section>
 
-      <p className="mt-6 text-center text-[11px] text-slate-400">v0.1.0 · Just-Speak</p>
+      <p className="mt-6 text-center text-[11px] text-slate-400">v0.2.0 · Just-Speak</p>
     </div>
   );
 }

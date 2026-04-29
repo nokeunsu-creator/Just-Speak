@@ -1,16 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import dialogues from '../../data/dialogues.json';
 import type { Dialogue } from '../../models/types';
 import { CATEGORIES } from '../../models/types';
 import { useApp } from '../../state/AppContext';
 import { CategoryCard } from './CategoryCard';
-import { RewardedModal } from '../ads/RewardedModal';
 
 const DATA = dialogues as Dialogue[];
 
 export function CategoryList() {
   const { state, dispatch } = useApp();
-  const [pendingUnlock, setPendingUnlock] = useState<string | null>(null);
 
   const totals = useMemo(() => {
     const map: Record<string, number> = {};
@@ -19,23 +17,6 @@ export function CategoryList() {
     }
     return map;
   }, []);
-
-  const handleSelect = (categoryId: string) => {
-    const meta = CATEGORIES.find((c) => c.id === categoryId);
-    if (!meta) return;
-    const isLocked = meta.locked && !state.unlocked.includes(categoryId);
-    if (isLocked) {
-      setPendingUnlock(categoryId);
-      return;
-    }
-    dispatch({ type: 'OPEN_CATEGORY', categoryId });
-  };
-
-  const handleUnlocked = (categoryId: string) => {
-    dispatch({ type: 'UNLOCK', categoryId });
-    setPendingUnlock(null);
-    dispatch({ type: 'OPEN_CATEGORY', categoryId });
-  };
 
   return (
     <div className="px-4 pb-24 pt-4">
@@ -52,27 +33,17 @@ export function CategoryList() {
         {CATEGORIES.map((cat) => {
           const total = totals[cat.id] ?? 0;
           const done = (state.progress[cat.id] ?? []).length;
-          const isLocked = cat.locked && !state.unlocked.includes(cat.id);
           return (
             <CategoryCard
               key={cat.id}
               category={cat}
               total={total}
               done={done}
-              isLocked={isLocked}
-              onSelect={() => handleSelect(cat.id)}
+              onSelect={() => dispatch({ type: 'OPEN_CATEGORY', categoryId: cat.id })}
             />
           );
         })}
       </div>
-
-      {pendingUnlock && (
-        <RewardedModal
-          categoryName={CATEGORIES.find((c) => c.id === pendingUnlock)?.name ?? ''}
-          onClose={() => setPendingUnlock(null)}
-          onRewarded={() => handleUnlocked(pendingUnlock)}
-        />
-      )}
     </div>
   );
 }

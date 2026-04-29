@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import dialogues from '../../data/dialogues.json';
 import type { Dialogue } from '../../models/types';
 import { CATEGORIES } from '../../models/types';
@@ -6,7 +6,6 @@ import { useApp } from '../../state/AppContext';
 import { useTTS } from '../../hooks/useTTS';
 import { DialogueLine } from './DialogueLine';
 import { ListenButton } from './ListenButton';
-import { InterstitialAd } from '../ads/InterstitialAd';
 
 const DATA = dialogues as Dialogue[];
 
@@ -21,8 +20,6 @@ export function DialogueScreen() {
 
   const { speakOne, playQueue, stop, playingIndex, queueRunning } = useTTS();
   const lineRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const [showInterstitial, setShowInterstitial] = useState(false);
-  const completionCelebratedRef = useRef(false);
 
   const seen = (categoryId && state.progress[categoryId]) || [];
   const total = lines.length;
@@ -33,14 +30,6 @@ export function DialogueScreen() {
     const el = lineRefs.current[playingIndex];
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [playingIndex]);
-
-  useEffect(() => {
-    if (!categoryId || total === 0) return;
-    if (done >= total && !completionCelebratedRef.current) {
-      completionCelebratedRef.current = true;
-      setShowInterstitial(true);
-    }
-  }, [done, total, categoryId]);
 
   if (!categoryId || !meta) {
     return (
@@ -110,13 +99,6 @@ export function DialogueScreen() {
           </div>
         ))}
       </div>
-
-      {showInterstitial && (
-        <InterstitialAd
-          reason="카테고리 완주! 잠시 광고 후 계속됩니다."
-          onClose={() => setShowInterstitial(false)}
-        />
-      )}
     </div>
   );
 }

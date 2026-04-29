@@ -16,15 +16,6 @@ describe('StorageService', () => {
     expect(StorageService.loadProgress()).toEqual({ '공항': [1, 2, 3] });
   });
 
-  it('returns empty unlocked by default', () => {
-    expect(StorageService.loadUnlocked()).toEqual([]);
-  });
-
-  it('saves and loads unlocked categories', () => {
-    StorageService.saveUnlocked(['전화', '면접']);
-    expect(StorageService.loadUnlocked()).toEqual(['전화', '면접']);
-  });
-
   it('returns default settings when nothing saved', () => {
     expect(StorageService.loadSettings()).toEqual(DEFAULT_SETTINGS);
   });
@@ -43,10 +34,10 @@ describe('StorageService', () => {
 
   it('clears all keys', () => {
     StorageService.saveProgress({ '공항': [1] });
-    StorageService.saveUnlocked(['전화']);
+    StorageService.saveSettings({ ...DEFAULT_SETTINGS, ttsRate: 1.1 });
     StorageService.clearAll();
     expect(StorageService.loadProgress()).toEqual({});
-    expect(StorageService.loadUnlocked()).toEqual([]);
+    expect(StorageService.loadSettings()).toEqual(DEFAULT_SETTINGS);
   });
 
   it('persists onboarded flag', () => {

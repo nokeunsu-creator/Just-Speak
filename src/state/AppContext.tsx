@@ -8,9 +8,7 @@ type Action =
   | { type: 'OPEN_CATEGORY'; categoryId: string }
   | { type: 'CLOSE_CATEGORY' }
   | { type: 'MARK_VIEWED'; categoryId: string; dialogueId: number }
-  | { type: 'UNLOCK'; categoryId: string }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<Settings> }
-  | { type: 'SET_LAST_VISIT'; ts: number }
   | { type: 'COMPLETE_ONBOARDING' }
   | { type: 'RESET_PROGRESS' };
 
@@ -19,9 +17,7 @@ function initialState(): AppState {
     tab: 'list',
     currentCategory: null,
     progress: StorageService.loadProgress(),
-    unlocked: StorageService.loadUnlocked(),
     settings: StorageService.loadSettings(),
-    lastVisit: StorageService.loadLastVisit(),
     onboarded: StorageService.loadOnboarded(),
   };
 }
@@ -46,16 +42,8 @@ function reducer(state: AppState, action: Action): AppState {
       };
     }
 
-    case 'UNLOCK': {
-      if (state.unlocked.includes(action.categoryId)) return state;
-      return { ...state, unlocked: [...state.unlocked, action.categoryId] };
-    }
-
     case 'UPDATE_SETTINGS':
       return { ...state, settings: { ...state.settings, ...action.patch } };
-
-    case 'SET_LAST_VISIT':
-      return { ...state, lastVisit: action.ts };
 
     case 'COMPLETE_ONBOARDING':
       return { ...state, onboarded: true };
@@ -64,7 +52,6 @@ function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         progress: {},
-        unlocked: [],
         settings: { ...DEFAULT_SETTINGS },
         onboarded: false,
       };
@@ -87,20 +74,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     debouncedSave(() => {
       StorageService.saveProgress(state.progress);
-      StorageService.saveUnlocked(state.unlocked);
       StorageService.saveSettings(state.settings);
-      StorageService.saveLastVisit(state.lastVisit);
       StorageService.saveOnboarded(state.onboarded);
     });
-  }, [state.progress, state.unlocked, state.settings, state.lastVisit, state.onboarded]);
+  }, [state.progress, state.settings, state.onboarded]);
 
   useEffect(() => {
     const flushOnExit = () => {
       flushDebouncedSave();
       StorageService.saveProgress(state.progress);
-      StorageService.saveUnlocked(state.unlocked);
       StorageService.saveSettings(state.settings);
-      StorageService.saveLastVisit(state.lastVisit);
       StorageService.saveOnboarded(state.onboarded);
     };
     window.addEventListener('beforeunload', flushOnExit);
