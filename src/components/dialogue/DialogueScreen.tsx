@@ -6,6 +6,7 @@ import { useApp } from '../../state/AppContext';
 import { useTTS } from '../../hooks/useTTS';
 import { DialogueLine } from './DialogueLine';
 import { ListenButton } from './ListenButton';
+import { CategoryGuide } from './CategoryGuide';
 
 const DATA = dialogues as Dialogue[];
 
@@ -82,6 +83,8 @@ export function DialogueScreen() {
           </span>
         </div>
       </div>
+
+      <CategoryGuide meta={meta} />
 
       <div className="flex flex-col gap-3">
         {lines.map((d, i) => (

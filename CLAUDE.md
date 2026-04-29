@@ -7,7 +7,7 @@
 - 배포 명령어: `NODE_TLS_REJECT_UNAUTHORIZED=0 npx vercel --prod --yes` (사내망 SSL 우회)
 
 ## 프로젝트 개요
-공항·식당·호텔 등 실전 상황 15가지 × 20문장 (총 300개) 영어 쉐도잉 학습 웹앱.
+공항·식당·호텔 등 실전 상황 25가지 × 20문장 (총 500개) 영어 쉐도잉 학습 웹앱.
 TTS로 음성을 들으며 따라말하기, 진도 자동 저장.
 
 - **라이브 URL**: https://just-speak-blue.vercel.app
@@ -25,12 +25,16 @@ TTS로 음성을 들으며 따라말하기, 진도 자동 저장.
 
 ## 핵심 아키텍처
 
-### 데이터 모델 (`src/models/types.ts`)
+### 데이터 모델 (`src/models/types.ts`, `src/data/categories.ts`)
 - `Dialogue`: id, category, speaker(A/B), english, korean
-- `CategoryMeta`: id, name, emoji, description
+- `CategoryMeta`: id, name, emoji, description, **situation**(상황 설명), **keyPhrases**(KeyPhrase[])
+- `KeyPhrase`: { en, ko } — 카테고리별 5개 핵심 표현
+- `LearningStep`: { num, title, desc } — 쉐도잉 4단계
 - `Settings`: ttsRate, ttsPitch, gapMs, dark
 - `AppState`: tab, currentCategory, progress, settings, onboarded
-- `CATEGORIES` 상수: 15개 카테고리 메타
+- `CATEGORIES` (categories.ts): 25개 카테고리 메타 + situation + keyPhrases
+- `LEARNING_STEPS` (categories.ts): 듣기→의미확인→따라말하기→자동재생 4단계
+- `BEGINNER_PICKS` (categories.ts): 초보자 추천 카테고리 ID 배열
 
 ### TTS 엔진 (`src/engine/tts.ts`)
 - Web Speech API 래퍼. iOS Safari 첫 사용자 제스처 unlock 처리
@@ -56,7 +60,9 @@ src/
 ├── App.tsx                      # 헤더, 탭 전환, 다크모드
 ├── main.tsx
 ├── index.css                    # tailwind 진입점 + 다크모드
-├── data/dialogues.json          # 300개 대화 (15×20)
+├── data/
+│   ├── dialogues.json           # 500개 대화 (25×20)
+│   └── categories.ts            # CATEGORIES(25) + LEARNING_STEPS + BEGINNER_PICKS
 ├── models/types.ts              # 타입 + CATEGORIES 상수
 ├── engine/
 │   ├── tts.ts                   # Web Speech API 래퍼
@@ -72,8 +78,9 @@ src/
 │   │   ├── CategoryCard.tsx     # 카드 (진도바 포함)
 │   │   └── CategoryList.tsx
 │   ├── dialogue/
-│   │   ├── DialogueScreen.tsx   # 학습 화면 (sticky 헤더, 자동스크롤)
+│   │   ├── DialogueScreen.tsx   # 학습 화면 (sticky 헤더, 자동스크롤, 가이드 패널)
 │   │   ├── DialogueLine.tsx     # 줄 카드 (영문→탭→한글, 🔊 듣기)
+│   │   ├── CategoryGuide.tsx    # 상황 설명 + 핵심표현 + 4단계 학습법 (펼침 토글)
 │   │   └── ListenButton.tsx
 │   ├── onboarding/Welcome.tsx
 │   └── settings/SettingsPage.tsx
@@ -87,22 +94,12 @@ scripts/
 └── generate-icons.mjs            # sharp 기반 PNG 생성
 ```
 
-## 카테고리 (15)
-1. 공항 ✈️
-2. 식당 🍽️
-3. 호텔 🏨
-4. 병원 🏥
-5. 쇼핑 🛍️
-6. 길묻기 🧭
-7. 카페 ☕
-8. 자기소개 🤝
-9. 비즈니스 미팅 💼
-10. 전화 응대 📞
-11. 영어 면접 🎤
-12. 택시·교통 🚖
-13. 영화관 🎬
-14. 긴급상황 🚨
-15. 은행·환전 🏦
+## 카테고리 (25)
+일상: 공항 ✈️ · 식당 🍽️ · 호텔 🏨 · 병원 🏥 · 쇼핑 🛍️ · 길묻기 🧭 · 카페 ☕ · 자기소개 🤝
+업무: 비즈니스 미팅 💼 · 전화 응대 📞 · 영어 면접 🎤
+이동: 택시·교통 🚖 · 자동차·정비 🔧
+여가: 영화관 🎬 · 미술관·박물관 🖼️ · 공원·산책 🌳
+생활: 긴급상황 🚨 · 은행·환전 🏦 · 우체국·택배 📮 · 미용실 💇 · 약국 💊 · 헬스장 🏋️ · 식료품·마트 🛒 · 도서관 📚 · 학교·수업 🎓
 
 ## 빌드 & 실행
 ```bash
