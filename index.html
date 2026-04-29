@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#4F46E5" />
+    <meta name="description" content="Just-Speak — 상황별 영어 쉐도잉으로 회화 실력을 늘려보세요. 공항, 식당, 호텔 등 10가지 실전 상황." />
+    <meta name="keywords" content="영어회화, 쉐도잉, 영어 학습, TTS, 상황별 영어, 무료 영어" />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Just-Speak — 상황별 영어 쉐도잉" />
+    <meta property="og:description" content="실전 상황 10종 × 20문장. 음성 따라말하기 학습 앱." />
+    <meta property="og:url" content="https://just-speak.vercel.app" />
+
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Google AdSense (승인 후 활성화) -->
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
+    <title>Just-Speak — 상황별 영어 쉐도잉</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
