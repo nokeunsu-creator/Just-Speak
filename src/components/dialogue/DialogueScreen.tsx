@@ -7,11 +7,14 @@ import { useTTS } from '../../hooks/useTTS';
 import { DialogueLine } from './DialogueLine';
 import { ListenButton } from './ListenButton';
 import { CategoryGuide } from './CategoryGuide';
+import { goBack } from '../../hooks/useAndroidBack';
+import { t } from '../../i18n/strings';
 
 const DATA = dialogues as Dialogue[];
 
 export function DialogueScreen() {
   const { state, dispatch } = useApp();
+  const lang = state.settings.language;
   const categoryId = state.currentCategory;
   const meta = CATEGORIES.find((c) => c.id === categoryId);
   const lines = useMemo<Dialogue[]>(
@@ -33,11 +36,7 @@ export function DialogueScreen() {
   }, [playingIndex]);
 
   if (!categoryId || !meta) {
-    return (
-      <div className="p-6 text-center text-slate-500">
-        카테고리를 선택해주세요.
-      </div>
-    );
+    return <div className="p-6 text-center text-slate-500">No category</div>;
   }
 
   const markViewed = (dialogueId: number) => {
@@ -45,14 +44,8 @@ export function DialogueScreen() {
   };
 
   const handleListenToggle = () => {
-    if (queueRunning) {
-      stop();
-      return;
-    }
-    playQueue(
-      lines.map((l) => l.english),
-      (i) => markViewed(lines[i].id)
-    );
+    if (queueRunning) { stop(); return; }
+    playQueue(lines.map((l) => l.english), (i) => markViewed(lines[i].id));
   };
 
   return (
@@ -60,16 +53,16 @@ export function DialogueScreen() {
       <div className="sticky top-0 z-10 -mx-4 mb-3 border-b border-slate-200 bg-white/85 px-4 py-3 backdrop-blur dark:border-slate-700 dark:bg-slate-900/85">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => { stop(); dispatch({ type: 'CLOSE_CATEGORY' }); }}
+            onClick={() => { stop(); goBack(); }}
             className="rounded-full bg-slate-100 px-3 py-1 text-sm dark:bg-slate-800 dark:text-slate-200"
-            aria-label="뒤로 가기"
+            aria-label={t('back', lang)}
           >
-            ← 뒤로
+            {t('back', lang)}
           </button>
           <h2 className="flex-1 text-center text-base font-bold text-slate-900 dark:text-slate-100">
             {meta.emoji} {meta.name}
           </h2>
-          <ListenButton isPlaying={queueRunning} onClick={handleListenToggle} />
+          <ListenButton isPlaying={queueRunning} onClick={handleListenToggle} lang={lang} />
         </div>
         <div className="mt-2 flex items-center gap-2">
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-indigo-100 dark:bg-slate-700">
@@ -78,26 +71,24 @@ export function DialogueScreen() {
               style={{ width: `${total > 0 ? (done / total) * 100 : 0}%` }}
             />
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            {done} / {total}
-          </span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">{done} / {total}</span>
         </div>
       </div>
 
-      <CategoryGuide meta={meta} />
+      <CategoryGuide meta={meta} lang={lang} />
 
       <div className="flex flex-col gap-3">
         {lines.map((d, i) => (
-          <div
-            key={d.id}
-            ref={(el) => { lineRefs.current[i] = el; }}
-          >
+          <div key={d.id} ref={(el) => { lineRefs.current[i] = el; }}>
             <DialogueLine
               dialogue={d}
               isPlaying={playingIndex === i}
               isViewed={seen.includes(d.id)}
+              isFavorite={state.favorites.includes(d.id)}
+              lang={lang}
               onSpeak={() => speakOne(d.english)}
               onMarkViewed={() => markViewed(d.id)}
+              onToggleFavorite={() => dispatch({ type: 'TOGGLE_FAVORITE', dialogueId: d.id })}
             />
           </div>
         ))}

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import type { CategoryMeta } from '../../models/types';
 import { LEARNING_STEPS } from '../../models/types';
+import { t, type Lang } from '../../i18n/strings';
 
 interface Props {
   meta: CategoryMeta;
+  lang: Lang;
 }
 
-export function CategoryGuide({ meta }: Props) {
+export function CategoryGuide({ meta, lang }: Props) {
   const [open, setOpen] = useState(true);
 
   return (
@@ -15,21 +17,20 @@ export function CategoryGuide({ meta }: Props) {
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between px-4 py-3 text-left"
         aria-expanded={open}
-        aria-controls="category-guide-body"
       >
         <span className="text-sm font-bold text-indigo-700 dark:text-indigo-300">
-          📖 학습 가이드 — {meta.name}
+          📖 {t('guideTitle', lang)} — {meta.name}
         </span>
         <span className="text-xs text-indigo-700/70 dark:text-indigo-300/70">
-          {open ? '접기 ▴' : '펼치기 ▾'}
+          {open ? t('guideCollapse', lang) : t('guideExpand', lang)}
         </span>
       </button>
 
       {open && (
-        <div id="category-guide-body" className="border-t border-indigo-100 px-4 py-3 dark:border-slate-700">
+        <div className="border-t border-indigo-100 px-4 py-3 dark:border-slate-700">
           <div className="mb-3">
             <h4 className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">
-              🎬 어떤 상황인가요?
+              {t('guideSituation', lang)}
             </h4>
             <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
               {meta.situation}
@@ -38,7 +39,7 @@ export function CategoryGuide({ meta }: Props) {
 
           <div className="mb-3">
             <h4 className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">
-              ⭐ 핵심 표현
+              {t('guideKeyPhrases', lang)}
             </h4>
             <ul className="space-y-1">
               {meta.keyPhrases.map((p, i) => (
@@ -51,9 +52,30 @@ export function CategoryGuide({ meta }: Props) {
             </ul>
           </div>
 
+          {meta.grammarNotes.length > 0 && (
+            <div className="mb-3">
+              <h4 className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">
+                {t('guideGrammar', lang)}
+              </h4>
+              <ul className="space-y-2">
+                {meta.grammarNotes.map((n, i) => (
+                  <li key={i} className="rounded-lg bg-white px-3 py-2 text-xs dark:bg-slate-800">
+                    <div className="font-semibold text-indigo-700 dark:text-indigo-300">{n.pattern}</div>
+                    <div className="mt-0.5 text-slate-600 dark:text-slate-300">{n.desc}</div>
+                    <ul className="mt-1 space-y-0.5">
+                      {n.examples.map((ex, j) => (
+                        <li key={j} className="text-slate-500 dark:text-slate-400">· {ex}</li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div>
             <h4 className="mb-1 text-xs font-bold text-slate-500 dark:text-slate-400">
-              🪜 학습 4단계 (쉐도잉)
+              {t('guideSteps', lang)}
             </h4>
             <ol className="space-y-1.5">
               {LEARNING_STEPS.map((s) => (
@@ -63,8 +85,7 @@ export function CategoryGuide({ meta }: Props) {
                   </span>
                   <span className="leading-relaxed text-slate-700 dark:text-slate-200">
                     <strong className="text-slate-900 dark:text-slate-100">{s.title}</strong>
-                    {' — '}
-                    {s.desc}
+                    {' — '}{s.desc}
                   </span>
                 </li>
               ))}

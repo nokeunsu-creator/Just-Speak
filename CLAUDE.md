@@ -8,7 +8,7 @@
 
 ## 프로젝트 개요
 공항·식당·호텔 등 실전 상황 25가지 × 20문장 (총 500개) 영어 쉐도잉 학습 웹앱.
-TTS로 음성을 들으며 따라말하기, 진도 자동 저장.
+TTS로 음성을 들으며 따라말하기, 진도/즐겨찾기/학습 통계 자동 저장. 마이크 녹음으로 발음 비교, 한/영 UI 토글, Android 뒤로가기 매핑(TWA 호환).
 
 - **라이브 URL**: https://just-speak-blue.vercel.app
 - **GitHub**: https://github.com/nokeunsu-creator/Just-Speak
@@ -26,15 +26,17 @@ TTS로 음성을 들으며 따라말하기, 진도 자동 저장.
 ## 핵심 아키텍처
 
 ### 데이터 모델 (`src/models/types.ts`, `src/data/categories.ts`)
-- `Dialogue`: id, category, speaker(A/B), english, korean
-- `CategoryMeta`: id, name, emoji, description, **situation**(상황 설명), **keyPhrases**(KeyPhrase[])
+- `Dialogue`: id, category, speaker(A/B), english, korean, tip?:{ word, meaning }
+- `CategoryMeta`: id, name, emoji, description, situation, keyPhrases, **level**(beginner|intermediate|advanced), **group**(일상|업무|이동|여가|생활), **grammarNotes**(GrammarNote[])
+- `GrammarNote`: { pattern, desc, examples[] } — 카테고리당 1~2개
 - `KeyPhrase`: { en, ko } — 카테고리별 5개 핵심 표현
 - `LearningStep`: { num, title, desc } — 쉐도잉 4단계
-- `Settings`: ttsRate, ttsPitch, gapMs, dark
-- `AppState`: tab, currentCategory, progress, settings, onboarded
-- `CATEGORIES` (categories.ts): 25개 카테고리 메타 + situation + keyPhrases
-- `LEARNING_STEPS` (categories.ts): 듣기→의미확인→따라말하기→자동재생 4단계
-- `BEGINNER_PICKS` (categories.ts): 초보자 추천 카테고리 ID 배열
+- `DailyStats`: { date(YYYY-MM-DD), count } — 일별 학습 카운트 (최근 60일)
+- `Settings`: ttsRate, ttsPitch, gapMs, dark, **language**('ko'|'en')
+- `Tab`: 'list' | 'study' | 'settings' | **'favorites'**
+- `AppState`: tab, currentCategory, **search**, progress, **favorites**, **dailyStats**, settings, onboarded
+- `CATEGORIES` (categories.ts): 25개 메타 + level + group + grammarNotes
+- `LEARNING_STEPS`, `BEGINNER_PICKS` (categories.ts)
 
 ### TTS 엔진 (`src/engine/tts.ts`)
 - Web Speech API 래퍼. iOS Safari 첫 사용자 제스처 unlock 처리

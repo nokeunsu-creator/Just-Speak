@@ -1,9 +1,11 @@
-import type { Settings } from '../models/types';
+import type { Settings, DailyStats } from '../models/types';
 import { DEFAULT_SETTINGS } from '../models/types';
 
 const KEY_PROGRESS = '@js:progress';
 const KEY_SETTINGS = '@js:settings';
 const KEY_ONBOARDED = '@js:onboarded';
+const KEY_FAVORITES = '@js:favorites';
+const KEY_DAILY = '@js:daily';
 
 function safeGet<T>(key: string, fallback: T): T {
   try {
@@ -46,8 +48,22 @@ export const StorageService = {
     safeSet(KEY_ONBOARDED, value);
   },
 
+  loadFavorites(): number[] {
+    return safeGet<number[]>(KEY_FAVORITES, []);
+  },
+  saveFavorites(ids: number[]): void {
+    safeSet(KEY_FAVORITES, ids);
+  },
+
+  loadDailyStats(): DailyStats[] {
+    return safeGet<DailyStats[]>(KEY_DAILY, []);
+  },
+  saveDailyStats(stats: DailyStats[]): void {
+    safeSet(KEY_DAILY, stats);
+  },
+
   clearAll(): void {
-    [KEY_PROGRESS, KEY_SETTINGS, KEY_ONBOARDED].forEach((k) => {
+    [KEY_PROGRESS, KEY_SETTINGS, KEY_ONBOARDED, KEY_FAVORITES, KEY_DAILY].forEach((k) => {
       try { localStorage.removeItem(k); } catch { /* ignore */ }
     });
   },
@@ -65,4 +81,9 @@ export function flushDebouncedSave(): void {
     clearTimeout(saveTimer);
     saveTimer = null;
   }
+}
+
+export function todayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
